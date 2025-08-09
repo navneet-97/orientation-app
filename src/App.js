@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-const OWM_KEY = process.env.REACT_APP_OWM_KEY;
+const OWM_KEY = "cf3539c442c8784318e30746062a21f3";
 const OWM_BASE = "https://api.openweathermap.org/data/2.5/weather";
 
 const injectStyles = () => {
@@ -270,12 +270,16 @@ function Timer({ manualMode }) {
   const [remaining, setRemaining] = useState(30000);
   const endRef = useRef(null);
   const tickerRef = useRef(null);
+  const runningRef = useRef(false);
 
   useEffect(() => {
-    if (!running) {
-      setRemaining((inputMin * 60 + Number(inputSec || 0)) * 1000);
-    }
-  }, [inputMin, inputSec, running]);
+    runningRef.current = running;
+  }, [running]);
+
+  useEffect(() => {
+    if (runningRef.current) return;
+    setRemaining((inputMin * 60 + Number(inputSec || 0)) * 1000);
+  }, [inputMin, inputSec]);
 
   useEffect(() => {
     if (running) {
@@ -319,6 +323,7 @@ function Timer({ manualMode }) {
       <div className="controls">
         <button className="cta" onClick={() => {
           if (running) {
+            setRemaining(Math.max(0, endRef.current - Date.now()));
             setRunning(false);
           } else if (remaining > 0) {
             endRef.current = Date.now() + remaining;
